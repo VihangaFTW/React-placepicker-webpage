@@ -13,11 +13,13 @@ const prevPlaces = storedIds.map((id) =>
 );
 
 function App() {
-  const modal = useRef();
   const selectedPlace = useRef();
+  // pickedPlaces is an array of place ids
   const [pickedPlaces, setPickedPlaces] = useState(prevPlaces);
 
   const [availablePlaces, setAvailablePlaces] = useState([]);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   // root level side effect code that changes state and runs ASYNC so needs useEffect();  otherwise infinite render loop
   useEffect(() => {
@@ -33,12 +35,12 @@ function App() {
   }, []);
 
   function handleStartRemovePlace(id) {
-    modal.current.open();
+    setIsOpen(true);
     selectedPlace.current = id;
   }
 
   function handleStopRemovePlace() {
-    modal.current.close();
+    setIsOpen(false);
   }
 
   function handleSelectPlace(id) {
@@ -64,7 +66,7 @@ function App() {
     setPickedPlaces((prevPickedPlaces) =>
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
-    modal.current.close();
+    setIsOpen(false);
     // side effect code within a function that doesnt change state so no need useState
     const storedIds = JSON.parse(localStorage.getItem("selectedPlaces")) || [];
     localStorage.setItem(
@@ -75,7 +77,7 @@ function App() {
 
   return (
     <>
-      <Modal ref={modal}>
+      <Modal isOpen={isOpen} onClose={handleStopRemovePlace}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}
           onConfirm={handleRemovePlace}
